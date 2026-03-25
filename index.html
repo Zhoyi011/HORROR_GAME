@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>伪人入侵 - 恐怖虚拟桌面</title>
+    <link rel="stylesheet" href="css/style.css?v=2">
+    <style>
+        .desktop-icon {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .window-content, .diary-entry, .job-item, .email-item, .search-input, .quest-container {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .icons-area {
+            display: grid !important;
+            grid-template-columns: repeat(4, 75px) !important;
+            gap: 15px !important;
+        }
+        @media (max-width: 768px) {
+            .icons-area {
+                grid-template-columns: repeat(3, 65px) !important;
+                gap: 10px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="mobileTip" class="mobile-tip hidden">
+        <div class="tip-content">
+            <span>📱 双指缩放 | 拖动窗口标题栏移动</span>
+            <button id="closeMobileTip">✕</button>
+        </div>
+    </div>
+
+    <div class="desktop" id="desktopApp">
+        <div class="icons-area">
+            <div class="desktop-icon" data-win="email"><div class="icon-img">📧</div><div class="icon-label">邮件箱</div></div>
+            <div class="desktop-icon" data-win="browser"><div class="icon-img">🌐</div><div class="icon-label">浏览器</div></div>
+            <div class="desktop-icon" data-win="notepad"><div class="icon-img">📝</div><div class="icon-label">记事本</div></div>
+            <div class="desktop-icon" data-win="settings"><div class="icon-img">⚙️</div><div class="icon-label">设置</div></div>
+            <div class="desktop-icon" data-win="security"><div class="icon-img">🛡️</div><div class="icon-label">安全中心</div></div>
+            <div class="desktop-icon" data-win="news"><div class="icon-img">📰</div><div class="icon-label">紧急新闻</div></div>
+            <div class="desktop-icon" data-win="chat"><div class="icon-img">💬</div><div class="icon-label">聊天</div></div>
+            <div class="desktop-icon" data-win="achievements"><div class="icon-img">🏆</div><div class="icon-label">结局图鉴</div></div>
+        </div>
+
+        <div class="info-panel">
+            <div class="sanity-container">
+                <div class="sanity-label">🧠 理智值</div>
+                <div class="sanity-bar-bg">
+                    <div class="sanity-bar-fill" id="sanityFill" style="width: 100%"></div>
+                </div>
+                <div class="sanity-percent" id="sanityPercent">100%</div>
+            </div>
+            <div class="quest-container" id="questContainer">
+                <div class="quest-title">📋 任务提示</div>
+                <div id="questText">🔍 急需一份工作。打开「浏览器」找工作...</div>
+            </div>
+            <div class="network-container" id="networkContainer">
+                <div class="network-status" id="networkStatus">
+                    <span class="network-icon">🌐</span>
+                    <span class="network-text">网络已连接</span>
+                </div>
+            </div>
+            <div class="ending-progress-container">
+                <div class="ending-progress-title">🏆 结局解锁进度</div>
+                <div class="ending-progress-bar">
+                    <div class="ending-progress-fill" id="endingProgressFill" style="width: 0%"></div>
+                </div>
+                <div class="ending-progress-text" id="endingProgressText">0 / 16</div>
+            </div>
+        </div>
+
+        <div class="taskbar">
+            <div class="start-btn" id="startBtn">开始</div>
+            <div class="task-tray" id="taskTray">
+                <div class="task-icon" data-win="email">📧</div>
+                <div class="task-icon" data-win="browser">🌐</div>
+                <div class="task-icon" data-win="notepad">📝</div>
+                <div class="task-icon" data-win="settings">⚙️</div>
+                <div class="task-icon" data-win="security">🛡️</div>
+            </div>
+            <div class="network-btn" id="networkToggleBtn" title="切换网络连接">
+                <span class="network-icon-small">🌐</span>
+            </div>
+            <div class="clock" id="clock">00:00</div>
+        </div>
+    </div>
+
+    <div id="startMenu" class="start-menu hidden">
+        <div class="start-menu-header">
+            <div class="start-menu-title">Windows 伪人版</div>
+        </div>
+        <div class="start-menu-items">
+            <div class="start-menu-item" id="shutdownBtn"><span>🔌</span> 关机</div>
+            <div class="start-menu-item" id="restartBtn"><span>🔄</span> 重启</div>
+            <div class="start-menu-item" id="achievementsBtn"><span>🏆</span> 结局图鉴</div>
+        </div>
+    </div>
+
+    <div id="windows-container"></div>
+
+    <div id="cameraModal" class="camera-modal hidden">
+        <div class="camera-modal-content">
+            <div class="camera-header">📷 摄像头请求</div>
+            <div class="camera-body">
+                <p>“伪人识别测试员” 职位需要开启摄像头进行面容验证</p>
+                <div class="camera-preview">
+                    <div class="fake-cam-feed">
+                        <span>📹 摄像头模拟中...</span>
+                        <div class="glitch-overlay-fake"></div>
+                    </div>
+                </div>
+                <div class="camera-buttons">
+                    <button id="cameraAllowBtn" class="cam-btn allow">允许</button>
+                    <button id="cameraDenyBtn" class="cam-btn deny">拒绝</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="endingModal" class="ending-modal hidden">
+        <div class="ending-content">
+            <div class="ending-category" id="endingCategory"></div>
+            <div class="ending-title" id="endingTitle">结局</div>
+            <div class="ending-text" id="endingText"></div>
+            <div class="ending-hint" id="endingHint"></div>
+            <button id="restartGameBtn" class="ending-btn">重新开始</button>
+            <button id="continueBtn" class="ending-btn secondary">查看结局图鉴</button>
+        </div>
+    </div>
+
+    <!-- 引入模块化JS - 添加版本号强制刷新 -->
+    <script src="js/utils/helpers.js?v=2"></script>
+    <script src="js/ui/notifications.js?v=2"></script>
+    <script src="js/ui/quest.js?v=2"></script>
+    <script src="js/data/endingsData.js?v=2"></script>
+    <script src="js/core/gameState.js?v=2"></script>
+    <script src="js/core/settings.js?v=2"></script>
+    <script src="js/modules/windowsManager.js?v=2"></script>
+    <script src="js/modules/browser.js?v=2"></script>
+    <script src="js/modules/email.js?v=2"></script>
+    <script src="js/modules/notepad.js?v=2"></script>
+    <script src="js/modules/security.js?v=2"></script>
+    <script src="js/modules/globalDoom.js?v=2"></script>
+    <script src="js/game.js?v=2"></script>
+</body>
+</html>
