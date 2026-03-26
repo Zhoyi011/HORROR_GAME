@@ -6,7 +6,7 @@ var EndingsData = {
         3: { name: "🌐 断网避难", category: "normal", desc: "断开网络连接后，伪人失去了追踪目标...", condition: "断网后应聘" },
         4: { name: "🧬 基因侵蚀", category: "bad", desc: "你的DNA被伪人程序慢慢改写...", condition: "理智值低于30%时被入侵" },  // 改回基因侵蚀
         5: { name: "🕳️ 深渊凝视", category: "bad", desc: "你研究伪人太久了...", condition: "搜索后理智归零" },
-        6: { name: "🛡️ 防火墙胜利", category: "good", desc: "防火墙联合拦截了伪人入侵...", condition: "全防护后入侵" },
+        6: { name: "🛡️ 防火墙无敌！", category: "good", desc: "防火墙联合拦截了伪人入侵...", condition: "全防护后入侵" },
         7: { name: "✨ 驱逐仪式", category: "good", desc: "你按照古籍方法完成了驱逐仪式...", condition: "搜索古籍+全防护+执行仪式" },
         8: { name: "🏠 家庭团圆", category: "good", desc: "你及时提醒了家人...", condition: "新闻后提醒家人+打开聊天" },
         9: { name: "📖 知识就是力量", category: "good", desc: "通过研究伪人的弱点...", condition: "搜索3个以上伪人关键词" },

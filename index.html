@@ -4,30 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>伪人入侵 - 恐怖虚拟桌面</title>
-    <link rel="stylesheet" href="css/style.css?v=2">
-    <style>
-        .desktop-icon {
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .window-content, .diary-entry, .job-item, .email-item, .search-input, .quest-container {
-            user-select: text;
-            -webkit-user-select: text;
-        }
-        .icons-area {
-            display: grid !important;
-            grid-template-columns: repeat(4, 75px) !important;
-            gap: 15px !important;
-        }
-        @media (max-width: 768px) {
-            .icons-area {
-                grid-template-columns: repeat(3, 65px) !important;
-                gap: 10px !important;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- 手机操作提示 -->
     <div id="mobileTip" class="mobile-tip hidden">
         <div class="tip-content">
             <span>📱 双指缩放 | 拖动窗口标题栏移动</span>
@@ -36,17 +16,43 @@
     </div>
 
     <div class="desktop" id="desktopApp">
+        <!-- 桌面图标区 - 自动换行 -->
         <div class="icons-area">
-            <div class="desktop-icon" data-win="email"><div class="icon-img">📧</div><div class="icon-label">邮件箱</div></div>
-            <div class="desktop-icon" data-win="browser"><div class="icon-img">🌐</div><div class="icon-label">浏览器</div></div>
-            <div class="desktop-icon" data-win="notepad"><div class="icon-img">📝</div><div class="icon-label">记事本</div></div>
-            <div class="desktop-icon" data-win="settings"><div class="icon-img">⚙️</div><div class="icon-label">设置</div></div>
-            <div class="desktop-icon" data-win="security"><div class="icon-img">🛡️</div><div class="icon-label">安全中心</div></div>
-            <div class="desktop-icon" data-win="news"><div class="icon-img">📰</div><div class="icon-label">紧急新闻</div></div>
-            <div class="desktop-icon" data-win="chat"><div class="icon-img">💬</div><div class="icon-label">聊天</div></div>
-            <div class="desktop-icon" data-win="achievements"><div class="icon-img">🏆</div><div class="icon-label">结局图鉴</div></div>
+            <div class="desktop-icon" data-win="email">
+                <div class="icon-img">📧</div>
+                <div class="icon-label">邮件箱</div>
+            </div>
+            <div class="desktop-icon" data-win="browser">
+                <div class="icon-img">🌐</div>
+                <div class="icon-label">浏览器</div>
+            </div>
+            <div class="desktop-icon" data-win="notepad">
+                <div class="icon-img">📝</div>
+                <div class="icon-label">记事本</div>
+            </div>
+            <div class="desktop-icon" data-win="settings">
+                <div class="icon-img">⚙️</div>
+                <div class="icon-label">设置</div>
+            </div>
+            <div class="desktop-icon" data-win="security">
+                <div class="icon-img">🛡️</div>
+                <div class="icon-label">安全中心</div>
+            </div>
+            <div class="desktop-icon" data-win="news">
+                <div class="icon-img">📰</div>
+                <div class="icon-label">紧急新闻</div>
+            </div>
+            <div class="desktop-icon" data-win="chat">
+                <div class="icon-img">💬</div>
+                <div class="icon-label">聊天</div>
+            </div>
+            <div class="desktop-icon" data-win="achievements">
+                <div class="icon-img">🏆</div>
+                <div class="icon-label">结局图鉴</div>
+            </div>
         </div>
 
+        <!-- 右侧信息面板 -->
         <div class="info-panel">
             <div class="sanity-container">
                 <div class="sanity-label">🧠 理智值</div>
@@ -74,35 +80,117 @@
             </div>
         </div>
 
+        <!-- Windows 11 风格任务栏 - 修复版 -->
         <div class="taskbar">
-            <div class="start-btn" id="startBtn">开始</div>
-            <div class="task-tray" id="taskTray">
+            <div class="taskbar-left">
+                <div class="start-btn" id="startBtn">
+                    <svg class="start-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 4H11V11H4V4Z" fill="white" stroke="white" stroke-width="1"/>
+                        <path d="M13 4H20V11H13V4Z" fill="white" stroke="white" stroke-width="1"/>
+                        <path d="M4 13H11V20H4V13Z" fill="white" stroke="white" stroke-width="1"/>
+                        <path d="M13 13H20V20H13V13Z" fill="white" stroke="white" stroke-width="1"/>
+                    </svg>
+                </div>
+                <div class="search-box" id="searchBox">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="taskbarSearch" placeholder="搜索">
+                </div>
+                <div class="task-view">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="4" width="7" height="7" rx="1" fill="white" stroke="white" stroke-width="1"/>
+                        <rect x="13" y="4" width="7" height="7" rx="1" fill="white" stroke="white" stroke-width="1"/>
+                        <rect x="4" y="13" width="7" height="7" rx="1" fill="white" stroke="white" stroke-width="1"/>
+                        <rect x="13" y="13" width="7" height="7" rx="1" fill="white" stroke="white" stroke-width="1"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="taskbar-center" id="taskTray">
                 <div class="task-icon" data-win="email">📧</div>
                 <div class="task-icon" data-win="browser">🌐</div>
                 <div class="task-icon" data-win="notepad">📝</div>
                 <div class="task-icon" data-win="settings">⚙️</div>
                 <div class="task-icon" data-win="security">🛡️</div>
             </div>
-            <div class="network-btn" id="networkToggleBtn" title="切换网络连接">
-                <span class="network-icon-small">🌐</span>
+            
+            <div class="taskbar-right">
+                <div class="system-icon" id="networkToggleBtn" title="切换网络连接">
+                    <span class="network-icon-text">🌐</span>
+                </div>
+                <div class="system-icon" id="volumeBtn" title="音量">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 10v4h4l5 5V5l-5 5H3z" fill="white" opacity="0.8"/>
+                    </svg>
+                </div>
+                <div class="system-icon" id="notificationBtn" title="通知">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.93 6 11v5l-2 2v1h16v-1l-2-2z" fill="white" opacity="0.8"/>
+                    </svg>
+                </div>
+                <div class="clock" id="clock">
+                    <span class="clock-time">00:00</span>
+                </div>
+                <div class="show-desktop" id="showDesktopBtn" title="显示桌面">
+                    <div class="desktop-peek"></div>
+                </div>
             </div>
-            <div class="clock" id="clock">00:00</div>
         </div>
     </div>
 
+    <!-- Windows 11 风格开始菜单 -->
     <div id="startMenu" class="start-menu hidden">
         <div class="start-menu-header">
-            <div class="start-menu-title">Windows 伪人版</div>
+            <div class="user-profile">
+                <div class="user-avatar-large" id="startMenuAvatar">👤</div>
+                <div class="user-info-large">
+                    <div class="user-name-large" id="startMenuUserName">玩家</div>
+                    <div class="user-email-large" id="startMenuUserEmail">player@horror-game.com</div>
+                </div>
+                <div class="user-settings">
+                    <button class="user-settings-btn" id="userSettingsBtn">⚙️</button>
+                </div>
+            </div>
         </div>
-        <div class="start-menu-items">
-            <div class="start-menu-item" id="shutdownBtn"><span>🔌</span> 关机</div>
-            <div class="start-menu-item" id="restartBtn"><span>🔄</span> 重启</div>
-            <div class="start-menu-item" id="achievementsBtn"><span>🏆</span> 结局图鉴</div>
+        
+        <div class="start-menu-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="startMenuSearch" placeholder="搜索应用、设置和文档...">
+        </div>
+        
+        <div class="start-menu-content">
+            <div class="pinned-apps">
+                <div class="section-title">📌 已固定</div>
+                <div class="apps-grid" id="pinnedApps"></div>
+            </div>
+            
+            <div class="all-apps">
+                <div class="section-title">📱 所有应用</div>
+                <div class="apps-list" id="allAppsList"></div>
+            </div>
+            
+            <div class="recommended-section">
+                <div class="section-title">💡 推荐</div>
+                <div class="recommended-items" id="recommendedItems"></div>
+            </div>
+        </div>
+        
+        <div class="start-menu-footer">
+            <div class="power-options">
+                <button class="power-btn" id="shutdownBtn">🔌 关机</button>
+                <button class="power-btn" id="restartBtn">🔄 重启</button>
+                <button class="power-btn" id="sleepBtn">💤 睡眠</button>
+            </div>
+            <div class="user-actions">
+                <button class="user-action-btn" id="achievementsBtn">🏆 结局图鉴</button>
+                <button class="user-action-btn" id="settingsQuickBtn">⚙️ 设置</button>
+            </div>
         </div>
     </div>
 
+    <!-- 窗口容器 -->
     <div id="windows-container"></div>
 
+    <!-- 假摄像头权限弹窗 -->
     <div id="cameraModal" class="camera-modal hidden">
         <div class="camera-modal-content">
             <div class="camera-header">📷 摄像头请求</div>
@@ -122,6 +210,7 @@
         </div>
     </div>
 
+    <!-- 结局模态框 -->
     <div id="endingModal" class="ending-modal hidden">
         <div class="ending-content">
             <div class="ending-category" id="endingCategory"></div>
@@ -133,19 +222,19 @@
         </div>
     </div>
 
-    <!-- 引入模块化JS - 添加版本号强制刷新 -->
-    <script src="js/utils/helpers.js?v=2"></script>
-    <script src="js/ui/notifications.js?v=2"></script>
-    <script src="js/ui/quest.js?v=2"></script>
-    <script src="js/data/endingsData.js?v=2"></script>
-    <script src="js/core/gameState.js?v=2"></script>
-    <script src="js/core/settings.js?v=2"></script>
-    <script src="js/modules/windowsManager.js?v=2"></script>
-    <script src="js/modules/browser.js?v=2"></script>
-    <script src="js/modules/email.js?v=2"></script>
-    <script src="js/modules/notepad.js?v=2"></script>
-    <script src="js/modules/security.js?v=2"></script>
-    <script src="js/modules/globalDoom.js?v=2"></script>
-    <script src="js/game.js?v=2"></script>
+    <!-- 引入模块化JS - 按正确顺序加载 -->
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/ui/notifications.js"></script>
+    <script src="js/ui/quest.js"></script>
+    <script src="js/data/endingsData.js"></script>
+    <script src="js/core/gameState.js"></script>
+    <script src="js/core/settings.js"></script>
+    <script src="js/modules/windowsManager.js"></script>
+    <script src="js/modules/browser.js"></script>
+    <script src="js/modules/email.js"></script>
+    <script src="js/modules/notepad.js"></script>
+    <script src="js/modules/security.js"></script>
+    <script src="js/modules/globalDoom.js"></script>
+    <script src="js/game.js"></script>
 </body>
 </html>

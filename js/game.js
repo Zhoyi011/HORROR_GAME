@@ -19,8 +19,9 @@ var Game = Game || {
     _toggleCount: 0,
     _ancientBooksFound: [],
     _predictionText: null,
-    _emailsRead: false,  // 邮件已读标记
+    _emailsRead: false,
     
+    // ==================== 初始化 ====================
     init: function() {
         console.log("Game initializing...");
         
@@ -47,7 +48,7 @@ var Game = Game || {
         this._email.init(
             this._windowManager.getContent('email'),
             this._state,
-            this  // 传入 Game 引用
+            this
         );
         
         this._notepad = Notepad;
@@ -85,59 +86,72 @@ var Game = Game || {
         this.updateNetworkUI();
         this.updateEndingProgress();
         
-        // 每小时检查古老契约
+        // 渲染开始菜单
+        this.renderStartMenuApps();
+        this.updateStartMenuUserInfo();
+        
+        // 设置双击打开应用
+        this.setupDoubleClick();
+        
+        // 更新时钟日期
         setInterval(function() {
-            if (window.Game) window.Game.checkAncientContract();
-        }, 60000);
+            var clockDate = document.querySelector('.clock-date');
+            if (clockDate) {
+                var d = new Date();
+                var month = (d.getMonth() + 1).toString().padStart(2,'0');
+                var day = d.getDate().toString().padStart(2,'0');
+                clockDate.textContent = month + '/' + day;
+            }
+        }, 1000);
         
         window.Game = this;
         
         console.log("Game initialized successfully");
     },
     
-    // 标记邮件已读
+    // ==================== 邮件已读标记 ====================
     markEmailsRead: function() {
         this._emailsRead = true;
-        // 结局10：所有邮件已读 + 解锁3个好结局
         if (this._goodEndingsCount >= 3 && this._emailsRead && !this._state.gameEnded && !this._state.isEndingUnlocked(10)) {
             this._state.unlockEnding(10);
             this.showEnding(10);
         }
     },
     
+    // ==================== 搜索计数 ====================
     addSearchCount: function() {
         this._searchCount++;
         console.log("搜索次数:", this._searchCount);
         
-        // 结局9：搜索3次以上伪人关键词
         if (this._searchCount >= 3 && !this._state.gameEnded && !this._state.isEndingUnlocked(9)) {
             this._state.unlockEnding(9);
             this.showEnding(9);
         }
     },
     
+    // ==================== 好结局计数 ====================
     addGoodEnding: function() {
         this._goodEndingsCount++;
         console.log("好结局数量:", this._goodEndingsCount);
         
-        // 结局10：解锁3个好结局 + 所有邮件已读
         if (this._goodEndingsCount >= 3 && this._emailsRead && !this._state.gameEnded && !this._state.isEndingUnlocked(10)) {
             this._state.unlockEnding(10);
             this.showEnding(10);
         }
     },
     
+    // ==================== 防护切换计数 ====================
     addToggleCount: function() {
         this._toggleCount++;
         console.log("防护切换次数:", this._toggleCount);
         
-        // 结局11：理智值在50%左右时，切换防护3次
         if (this._toggleCount >= 3 && this._state.sanity >= 45 && this._state.sanity <= 55 && !this._state.gameEnded && !this._state.isEndingUnlocked(11)) {
             this._state.unlockEnding(11);
             this.showEnding(11);
         }
     },
     
+    // ==================== 古籍收集 ====================
     addAncientBook: function(bookName) {
         if (this._ancientBooksFound.indexOf(bookName) === -1) {
             this._ancientBooksFound.push(bookName);
@@ -145,6 +159,7 @@ var Game = Game || {
         }
     },
     
+    // ==================== 预言系统 ====================
     setPrediction: function(text) {
         this._predictionText = text;
         console.log("预言已记录:", text);
@@ -152,12 +167,10 @@ var Game = Game || {
     },
     
     checkPrediction: function() {
-        if (!this._predictionText) return;
+        if (!this._predictionText) return false;
         
-        // 检查是否入侵发生
         if (this._predictionText.indexOf("入侵") !== -1 && this._state.step >= 2) {
             if (!this._state.gameEnded && !this._state.isEndingUnlocked(12)) {
-                // 阻止普通入侵，直接触发结局12
                 this._state.unlockEnding(12);
                 this.showEnding(12);
                 return true;
@@ -166,6 +179,7 @@ var Game = Game || {
         return false;
     },
     
+    // ==================== 代码真相 ====================
     checkCodeTruth: function() {
         if (this._state.sanity === 100 && !this._state.gameEnded && !this._state.isEndingUnlocked(14)) {
             this._state.unlockEnding(14);
@@ -173,12 +187,12 @@ var Game = Game || {
         }
     },
     
+    // ==================== 古老契约 ====================
     checkAncientContract: function() {
         var now = new Date();
         var hours = now.getHours();
         var minutes = now.getMinutes();
         
-        // 午夜12点（23:55 到 00:05）
         var isMidnight = (hours === 23 && minutes >= 55) || (hours === 0 && minutes <= 5);
         
         if (this._ancientBooksFound.length >= 1 && isMidnight && !this._state.gameEnded && !this._state.isEndingUnlocked(15)) {
@@ -187,6 +201,7 @@ var Game = Game || {
         }
     },
     
+    // ==================== 理智值死亡检测 ====================
     startSanityDeathCheck: function() {
         var self = this;
         this._sanityDeathCheckInterval = setInterval(function() {
@@ -202,6 +217,7 @@ var Game = Game || {
         }, 500);
     },
     
+    // ==================== 渲染成就图鉴 ====================
     renderAchievements: function() {
         var achievementsContent = this._windowManager.getContent('achievements');
         if (!achievementsContent) return;
@@ -226,6 +242,7 @@ var Game = Game || {
         achievementsContent.innerHTML = html;
     },
     
+    // ==================== 应聘工作 ====================
     applyForJob: function(job) {
         if (this._state.gameEnded) {
             Notifications.warning("游戏已结束，请点击「重启」重新开始", 2000);
@@ -234,14 +251,12 @@ var Game = Game || {
         
         if (this._state.jumpscareTriggered) return;
         
-        // 结局5：如果理智值已经很低且搜索过
         if (this._state.sanity <= 5 && this._searchCount >= 1) {
             this._state.unlockEnding(5);
             this.showEnding(5);
             return;
         }
         
-        // 伪人识别测试员 - 需要摄像头权限
         if (job.id === 2 && job.fakeCamera) {
             this.showCameraModalForJob(job);
             return;
@@ -261,10 +276,7 @@ var Game = Game || {
             this._email.render();
             this.shakeDesktop();
             
-            // 检查预言，如果预言成真则阻止入侵
-            if (this.checkPrediction()) {
-                return;
-            }
+            if (this.checkPrediction()) return;
             
             if (this._state.sanity <= 0) {
                 if (this._searchCount >= 1) {
@@ -278,34 +290,32 @@ var Game = Game || {
         }
     },
     
+    // ==================== 触发入侵 ====================
     triggerInvasion: function() {
-        // 结局5优先
         if (this._state.sanity <= 5 && this._searchCount >= 1 && !this._state.gameEnded) {
             this._state.unlockEnding(5);
             this.showEnding(5);
             return;
         }
         
-        // 结局3：断网逃生
         if (!this._state.isOnline && this._state.step >= 2) {
             GameState.unlockEnding(3);
             this.showEnding(3);
             return;
         }
         
-        // 结局6：防火墙胜利
-        if (Settings.firewallEnabled && Settings.antivirusEnabled && Settings.dnsEnabled && this._state.step >= 2) {
+        if (Settings.privacy.firewallEnabled && Settings.privacy.antivirusEnabled && Settings.privacy.dnsEnabled && this._state.step >= 2) {
             this._state.unlockEnding(6);
             this.showEnding(6);
             return;
         }
         
-        // 结局1：普通入侵
         if (!this._state.jumpscareTriggered && !this._state.gameEnded) {
             this.showInvasionInterface();
         }
     },
     
+    // ==================== 显示入侵界面 ====================
     showInvasionInterface: function() {
         this._windowManager.open('browser');
         
@@ -336,6 +346,7 @@ var Game = Game || {
         }, 100);
     },
     
+    // ==================== 摄像头弹窗 ====================
     showCameraModalForJob: function(job) {
         var modal = document.getElementById('cameraModal');
         if (!modal) return;
@@ -355,7 +366,6 @@ var Game = Game || {
                 
                 self._cameraAllowCount++;
                 
-                // 结局13：伪人之眼 - 拒绝3次后第4次同意
                 if (self._cameraDenyCount >= 3 && !self._state.gameEnded && !self._state.isEndingUnlocked(13)) {
                     self._state.unlockEnding(13);
                     self.showEnding(13);
@@ -393,10 +403,8 @@ var Game = Game || {
                 
                 self._cameraDenyCount++;
                 
-                // 拒绝3次后不再触发基因同化，而是允许触发伪人之眼
-                // 结局4改为其他触发方式，这里不触发结局4
                 if (self._cameraDenyCount >= 3 && !self._state.gameEnded) {
-                    Notifications.warning("👁️ 你多次拒绝摄像头...再拒绝一次可能会触发未知结局", 2000);
+                    Notifications.warning("👁️ 你多次拒绝摄像头...下次同意可能会触发隐藏结局", 2000);
                 }
                 
                 var browserContent = self._windowManager.getContent('browser');
@@ -429,6 +437,7 @@ var Game = Game || {
         }
     },
     
+    // ==================== 显示结局 ====================
     showEnding: function(endingId) {
         if (this._state.gameEnded) return;
         this._state.gameEnded = true;
@@ -483,6 +492,7 @@ var Game = Game || {
         this._windowManager.closeAll();
     },
     
+    // ==================== 跳吓动画 ====================
     triggerJumpscare: function() {
         if (this._state.jumpscareTriggered || this._state.gameEnded) return;
         this._state.jumpscareTriggered = true;
@@ -519,6 +529,7 @@ var Game = Game || {
         }, 2500);
     },
     
+    // ==================== 浏览器闪烁效果 ====================
     startBrowserGlitch: function() {
         var self = this;
         if (this._state.glitchInterval) clearInterval(this._state.glitchInterval);
@@ -531,6 +542,7 @@ var Game = Game || {
         }, 700);
     },
     
+    // ==================== 桌面震动 ====================
     shakeDesktop: function() {
         var desk = document.querySelector('.desktop');
         if (desk) {
@@ -539,16 +551,18 @@ var Game = Game || {
         }
     },
     
+    // ==================== 理智值自然流失 ====================
     startSanityDrain: function() {
         var self = this;
         setInterval(function() {
-            if (!self._state.gameEnded && self._state.step >= 2 && self._state.sanity > 0 && self._state.isOnline && !Settings.firewallEnabled) {
+            if (!self._state.gameEnded && self._state.step >= 2 && self._state.sanity > 0 && self._state.isOnline && !Settings.privacy.firewallEnabled) {
                 self._state.reduceSanity(1);
                 self.updateUI();
             }
         }, 4000);
     },
     
+    // ==================== UI更新 ====================
     updateUI: function() {
         var sanityFill = document.getElementById('sanityFill');
         var sanityPercent = document.getElementById('sanityPercent');
@@ -560,14 +574,17 @@ var Game = Game || {
         var networkText = document.querySelector('.network-text');
         var networkIcon = document.querySelector('.network-icon');
         var networkContainer = document.getElementById('networkContainer');
+        var networkIconSmall = document.getElementById('networkIcon');
         
         if (this._state.isOnline) {
             if (networkText) networkText.textContent = '网络已连接';
             if (networkIcon) networkIcon.textContent = '🌐';
+            if (networkIconSmall) networkIconSmall.textContent = '🌐';
             if (networkContainer) networkContainer.classList.remove('network-offline');
         } else {
             if (networkText) networkText.textContent = '网络已断开';
             if (networkIcon) networkIcon.textContent = '⚠️';
+            if (networkIconSmall) networkIconSmall.textContent = '⚠️';
             if (networkContainer) networkContainer.classList.add('network-offline');
         }
     },
@@ -581,24 +598,263 @@ var Game = Game || {
         if (text) text.innerText = count + ' / 16';
     },
     
+    // ==================== 开始菜单相关 ====================
+    updateStartMenuUserInfo: function() {
+        var avatarLarge = document.getElementById('startMenuAvatar');
+        var userNameLarge = document.getElementById('startMenuUserName');
+        var userEmailLarge = document.getElementById('startMenuUserEmail');
+        
+        if (avatarLarge) avatarLarge.textContent = Settings.user.avatar;
+        if (userNameLarge) userNameLarge.textContent = Settings.user.name;
+        if (userEmailLarge) userEmailLarge.textContent = Settings.user.email;
+    },
+    
+    renderStartMenuApps: function() {
+        var self = this;
+        var pinnedApps = [
+            { id: "browser", name: "浏览器", icon: "🌐" },
+            { id: "email", name: "邮件箱", icon: "📧" },
+            { id: "notepad", name: "记事本", icon: "📝" },
+            { id: "settings", name: "设置", icon: "⚙️" },
+            { id: "security", name: "安全中心", icon: "🛡️" },
+            { id: "achievements", name: "结局图鉴", icon: "🏆" },
+            { id: "news", name: "紧急新闻", icon: "📰" },
+            { id: "chat", name: "聊天", icon: "💬" }
+        ];
+        
+        var pinnedContainer = document.getElementById('pinnedApps');
+        if (pinnedContainer) {
+            pinnedContainer.innerHTML = '';
+            for (var i = 0; i < pinnedApps.length; i++) {
+                var app = pinnedApps[i];
+                var appDiv = document.createElement('div');
+                appDiv.className = 'app-grid-item';
+                appDiv.setAttribute('data-win', app.id);
+                appDiv.innerHTML = '<div class="app-grid-icon">' + app.icon + '</div>' +
+                    '<div class="app-grid-name">' + app.name + '</div>';
+                appDiv.onclick = (function(winId) {
+                    return function() {
+                        if (window.Game && !window.Game._state.gameEnded) {
+                            // 开始菜单直接打开，不加加载动画
+                            window.Game._windowManager.open(winId);
+                            document.getElementById('startMenu').classList.add('hidden');
+                            if (Settings.system.sound) Settings.playSound('click');
+                        }
+                    };
+                })(app.id);
+                pinnedContainer.appendChild(appDiv);
+            }
+        }
+        
+        var allApps = [
+            { id: "browser", name: "伪人浏览器", icon: "🌐", shortcut: "Alt+B" },
+            { id: "email", name: "邮件箱", icon: "📧", shortcut: "Alt+E" },
+            { id: "notepad", name: "记事本", icon: "📝", shortcut: "Alt+N" },
+            { id: "settings", name: "设置", icon: "⚙️", shortcut: "Alt+S" },
+            { id: "security", name: "Windows 安全中心", icon: "🛡️", shortcut: "Alt+W" },
+            { id: "achievements", name: "结局图鉴", icon: "🏆", shortcut: "" },
+            { id: "news", name: "紧急新闻", icon: "📰", shortcut: "" },
+            { id: "chat", name: "家人群聊", icon: "💬", shortcut: "" }
+        ];
+        
+        var allAppsContainer = document.getElementById('allAppsList');
+        if (allAppsContainer) {
+            allAppsContainer.innerHTML = '';
+            for (var i = 0; i < allApps.length; i++) {
+                var app = allApps[i];
+                var appDiv = document.createElement('div');
+                appDiv.className = 'app-list-item';
+                appDiv.setAttribute('data-win', app.id);
+                appDiv.innerHTML = '<div class="app-list-icon">' + app.icon + '</div>' +
+                    '<div class="app-list-name">' + app.name + '</div>' +
+                    (app.shortcut ? '<div class="app-list-shortcut">' + app.shortcut + '</div>' : '');
+                appDiv.onclick = (function(winId) {
+                    return function() {
+                        if (window.Game && !window.Game._state.gameEnded) {
+                            window.Game._windowManager.open(winId);
+                            document.getElementById('startMenu').classList.add('hidden');
+                            if (Settings.system.sound) Settings.playSound('click');
+                        }
+                    };
+                })(app.id);
+                allAppsContainer.appendChild(appDiv);
+            }
+        }
+        
+        var recommendedContainer = document.getElementById('recommendedItems');
+        if (recommendedContainer) {
+            var recommendations = [
+                { icon: "🏆", title: "继续解锁结局", desc: "已完成 " + this._state.getUnlockedCount() + "/16", action: "打开图鉴", winId: "achievements" },
+                { icon: "🔒", title: "安全防护建议", desc: "开启防火墙可抵御伪人", action: "打开设置", winId: "settings" },
+                { icon: "📖", title: "知识就是力量", desc: "搜索伪人关键词解锁结局", action: "去搜索", winId: "browser" }
+            ];
+            
+            recommendedContainer.innerHTML = '';
+            for (var i = 0; i < recommendations.length; i++) {
+                var rec = recommendations[i];
+                var recDiv = document.createElement('div');
+                recDiv.className = 'recommended-item';
+                recDiv.innerHTML = '<div class="recommended-icon">' + rec.icon + '</div>' +
+                    '<div class="recommended-content">' +
+                    '<div class="recommended-title">' + rec.title + '</div>' +
+                    '<div class="recommended-desc">' + rec.desc + '</div>' +
+                    '</div>' +
+                    '<div class="recommended-action">' + rec.action + ' →</div>';
+                recDiv.onclick = (function(winId) {
+                    return function() {
+                        if (window.Game && !window.Game._state.gameEnded) {
+                            window.Game._windowManager.open(winId);
+                            document.getElementById('startMenu').classList.add('hidden');
+                            if (Settings.system.sound) Settings.playSound('click');
+                        }
+                    };
+                })(rec.winId);
+                recommendedContainer.appendChild(recDiv);
+            }
+        }
+    },
+    
+    filterStartMenu: function(query) {
+        if (!query || query === '') {
+            this.renderStartMenuApps();
+            return;
+        }
+        
+        var allApps = [
+            { id: "browser", name: "伪人浏览器", icon: "🌐" },
+            { id: "email", name: "邮件箱", icon: "📧" },
+            { id: "notepad", name: "记事本", icon: "📝" },
+            { id: "settings", name: "设置", icon: "⚙️" },
+            { id: "security", name: "Windows 安全中心", icon: "🛡️" },
+            { id: "achievements", name: "结局图鉴", icon: "🏆" },
+            { id: "news", name: "紧急新闻", icon: "📰" },
+            { id: "chat", name: "家人群聊", icon: "💬" }
+        ];
+        
+        var filtered = allApps.filter(function(app) {
+            return app.name.toLowerCase().indexOf(query) !== -1;
+        });
+        
+        var allAppsContainer = document.getElementById('allAppsList');
+        if (allAppsContainer) {
+            allAppsContainer.innerHTML = '';
+            for (var i = 0; i < filtered.length; i++) {
+                var app = filtered[i];
+                var appDiv = document.createElement('div');
+                appDiv.className = 'app-list-item';
+                appDiv.setAttribute('data-win', app.id);
+                var nameHtml = app.name.replace(new RegExp('(' + query + ')', 'gi'), '<span class="search-highlight">$1</span>');
+                appDiv.innerHTML = '<div class="app-list-icon">' + app.icon + '</div>' +
+                    '<div class="app-list-name">' + nameHtml + '</div>';
+                appDiv.onclick = (function(winId) {
+                    return function() {
+                        if (window.Game && !window.Game._state.gameEnded) {
+                            window.Game._windowManager.open(winId);
+                            document.getElementById('startMenu').classList.add('hidden');
+                            if (Settings.system.sound) Settings.playSound('click');
+                        }
+                    };
+                })(app.id);
+                allAppsContainer.appendChild(appDiv);
+            }
+            
+            if (filtered.length === 0) {
+                allAppsContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">没有找到相关应用</div>';
+            }
+        }
+    },
+    
+    // ==================== 双击打开应用 ====================
+    setupDoubleClick: function() {
+        var self = this;
+        var desktopIcons = document.querySelectorAll('.desktop-icon');
+        
+        for (var i = 0; i < desktopIcons.length; i++) {
+            (function(icon) {
+                var clickTimer = null;
+                
+                icon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (clickTimer) {
+                        clearTimeout(clickTimer);
+                        clickTimer = null;
+                        // 双击
+                        var winId = icon.getAttribute('data-win');
+                        self.openAppWithAnimation(winId);
+                    } else {
+                        clickTimer = setTimeout(function() {
+                            clickTimer = null;
+                        }, 250);
+                    }
+                });
+            })(desktopIcons[i]);
+        }
+    },
+    
+    // ==================== 带动画和加载效果打开应用 ====================
+    openAppWithAnimation: function(winId) {
+        var self = this;
+        
+        if (this._state.gameEnded) {
+            Notifications.warning("游戏已结束，请点击「重启」重新开始", 2000);
+            return;
+        }
+        
+        // 创建加载遮罩
+        var loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'app-loading-overlay';
+        
+        var iconMap = {
+            'email': '📧',
+            'browser': '🌐',
+            'notepad': '📝',
+            'settings': '⚙️',
+            'security': '🛡️',
+            'achievements': '🏆',
+            'news': '📰',
+            'chat': '💬'
+        };
+        
+        loadingOverlay.innerHTML = `
+            <div class="loading-container">
+                <div class="app-loading-icon">${iconMap[winId] || '📱'}</div>
+                <div class="loading-spinner-small"></div>
+                <div class="loading-text">正在启动...</div>
+            </div>
+        `;
+        document.body.appendChild(loadingOverlay);
+        
+        loadingOverlay.style.animation = 'fadeIn 0.2s ease';
+        
+        // 随机1-2秒后打开窗口
+        var delay = 1000 + Math.random() * 1000;
+        
+        setTimeout(function() {
+            loadingOverlay.style.animation = 'fadeOut 0.2s ease';
+            setTimeout(function() {
+                loadingOverlay.remove();
+            }, 200);
+            
+            self._windowManager.open(winId);
+            
+            if (Settings.system.sound) Settings.playSound('notification');
+        }, delay);
+    },
+    
+    // ==================== UI事件绑定 ====================
     bindUIEvents: function() {
         var self = this;
         
-        var icons = document.querySelectorAll('[data-win]');
+        // 桌面图标点击（桌面双击已在 setupDoubleClick 中处理）
+        var icons = document.querySelectorAll('.desktop-icon');
         for (var i = 0; i < icons.length; i++) {
             (function(el) {
-                el.addEventListener('click', function(e) {
-                    var winId = el.getAttribute('data-win');
-                    if (!self._state.jumpscareTriggered && !self._state.gameEnded) {
-                        self._windowManager.open(winId);
-                    } else if (self._state.gameEnded) {
-                        Notifications.warning("游戏已结束，请点击「重启」重新开始", 2000);
-                    }
-                    e.stopPropagation();
-                });
+                // 桌面图标的单击不做任何事，双击才打开
+                // 只保留双击功能
             })(icons[i]);
         }
         
+        // 关闭按钮
         document.addEventListener('click', function(e) {
             if (e.target.classList && e.target.classList.contains('close-win')) {
                 var win = e.target.closest('.window');
@@ -606,15 +862,72 @@ var Game = Game || {
             }
         });
         
+        // 开始菜单按钮
         var startBtn = document.getElementById('startBtn');
         var startMenu = document.getElementById('startMenu');
         if (startBtn) {
             startBtn.onclick = function(e) {
                 e.stopPropagation();
                 startMenu.classList.toggle('hidden');
+                if (Settings.system.sound) Settings.playSound('click');
             };
         }
         
+        // 任务栏搜索框
+        var taskbarSearch = document.getElementById('taskbarSearch');
+        if (taskbarSearch) {
+            taskbarSearch.onfocus = function() {
+                startMenu.classList.remove('hidden');
+            };
+            taskbarSearch.oninput = function() {
+                var query = taskbarSearch.value.toLowerCase();
+                self.filterStartMenu(query);
+            };
+        }
+        
+        // 开始菜单搜索框
+        var startMenuSearch = document.getElementById('startMenuSearch');
+        if (startMenuSearch) {
+            startMenuSearch.oninput = function() {
+                var query = startMenuSearch.value.toLowerCase();
+                self.filterStartMenu(query);
+            };
+        }
+        
+        // 用户设置按钮
+        var userSettingsBtn = document.getElementById('userSettingsBtn');
+        if (userSettingsBtn) {
+            userSettingsBtn.onclick = function(e) {
+                e.stopPropagation();
+                startMenu.classList.add('hidden');
+                self._windowManager.open('settings');
+                if (Settings.system.sound) Settings.playSound('click');
+            };
+        }
+        
+        // 设置快速按钮
+        var settingsQuickBtn = document.getElementById('settingsQuickBtn');
+        if (settingsQuickBtn) {
+            settingsQuickBtn.onclick = function(e) {
+                e.stopPropagation();
+                startMenu.classList.add('hidden');
+                self._windowManager.open('settings');
+                if (Settings.system.sound) Settings.playSound('click');
+            };
+        }
+        
+        // 睡眠按钮
+        var sleepBtn = document.getElementById('sleepBtn');
+        if (sleepBtn) {
+            sleepBtn.onclick = function(e) {
+                e.stopPropagation();
+                startMenu.classList.add('hidden');
+                Notifications.info("💤 系统进入睡眠模式... 点击任意键唤醒", 2000);
+                if (Settings.system.sound) Settings.playSound('notification');
+            };
+        }
+        
+        // 关机 - 结局2
         var shutdownBtn = document.getElementById('shutdownBtn');
         if (shutdownBtn) {
             shutdownBtn.onclick = function(e) {
@@ -622,18 +935,22 @@ var Game = Game || {
                 startMenu.classList.add('hidden');
                 self._state.unlockEnding(2);
                 self.showEnding(2);
+                if (Settings.system.sound) Settings.playSound('error');
             };
         }
         
+        // 重启
         var restartBtn = document.getElementById('restartBtn');
         if (restartBtn) {
             restartBtn.onclick = function(e) {
                 e.stopPropagation();
                 startMenu.classList.add('hidden');
                 self.resetGame();
+                if (Settings.system.sound) Settings.playSound('click');
             };
         }
         
+        // 结局图鉴
         var achievementsBtn = document.getElementById('achievementsBtn');
         if (achievementsBtn) {
             achievementsBtn.onclick = function(e) {
@@ -641,9 +958,11 @@ var Game = Game || {
                 startMenu.classList.add('hidden');
                 self._windowManager.open('achievements');
                 self.renderAchievements();
+                if (Settings.system.sound) Settings.playSound('click');
             };
         }
         
+        // 网络切换
         var networkToggle = document.getElementById('networkToggleBtn');
         if (networkToggle) {
             networkToggle.onclick = function(e) {
@@ -657,27 +976,88 @@ var Game = Game || {
                 
                 if (!self._state.isOnline) {
                     Notifications.info("🌐 网络已断开！伪人无法通过网络追踪你", 3000);
+                    if (Settings.system.sound) Settings.playSound('notification');
                 } else {
                     Notifications.info("🌐 网络已恢复。可以继续寻找工作了", 3000);
                     self._browser.renderGoogleHomepage();
+                    if (Settings.system.sound) Settings.playSound('success');
                 }
             };
         }
         
+        // 音量按钮
+        var volumeBtn = document.getElementById('volumeBtn');
+        if (volumeBtn) {
+            volumeBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (Settings.system.sound) {
+                    Settings.system.sound = false;
+                    var soundToggle = document.getElementById('soundToggle');
+                    if (soundToggle) soundToggle.classList.remove('active');
+                    Notifications.info("🔇 声音已关闭", 2000);
+                } else {
+                    Settings.system.sound = true;
+                    var soundToggle = document.getElementById('soundToggle');
+                    if (soundToggle) soundToggle.classList.add('active');
+                    Settings.playSound('success');
+                    Notifications.success("🔊 声音已开启", 2000);
+                }
+                Settings.save();
+            };
+        }
+        
+        // 通知按钮
+        var notificationBtn = document.getElementById('notificationBtn');
+        if (notificationBtn) {
+            notificationBtn.onclick = function(e) {
+                e.stopPropagation();
+                Notifications.info("📢 你没有任何新通知", 2000);
+                if (Settings.system.sound) Settings.playSound('click');
+            };
+        }
+        
+        // 显示桌面按钮
+        var showDesktopBtn = document.getElementById('showDesktopBtn');
+        if (showDesktopBtn) {
+            showDesktopBtn.onclick = function(e) {
+                e.stopPropagation();
+                self._windowManager.closeAll();
+                if (Settings.system.sound) Settings.playSound('click');
+            };
+        }
+        
+        // 任务视图按钮
+        var taskView = document.querySelector('.task-view');
+        if (taskView) {
+            taskView.onclick = function(e) {
+                e.stopPropagation();
+                Notifications.info("🗂️ 任务视图功能开发中...", 2000);
+                if (Settings.system.sound) Settings.playSound('click');
+            };
+        }
+        
+        // 点击桌面关闭开始菜单
         document.addEventListener('click', function(e) {
-            if (startMenu && !startMenu.contains(e.target) && e.target !== startBtn) {
+            if (startMenu && !startMenu.contains(e.target) && e.target !== startBtn && !taskbarSearch.contains(e.target)) {
                 startMenu.classList.add('hidden');
             }
         });
         
+        // 任务栏图标点击 - 直接打开（无加载动画）
         var taskIcons = document.querySelectorAll('.task-icon');
+        console.log("找到任务栏图标:", taskIcons.length);
         for (var j = 0; j < taskIcons.length; j++) {
             (function(el) {
-                el.addEventListener('click', function(e) {
+                var newEl = el.cloneNode(true);
+                el.parentNode.replaceChild(newEl, el);
+                
+                newEl.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    var winId = el.getAttribute('data-win');
+                    var winId = this.getAttribute('data-win');
+                    console.log("任务栏点击:", winId);
                     if (winId && !self._state.jumpscareTriggered && !self._state.gameEnded) {
                         self._windowManager.open(winId);
+                        if (Settings.system.sound) Settings.playSound('click');
                     } else if (winId && self._state.gameEnded) {
                         Notifications.warning("游戏已结束，请点击「重启」重新开始", 2000);
                     }
@@ -686,6 +1066,7 @@ var Game = Game || {
         }
     },
     
+    // ==================== 时钟 ====================
     startClock: function() {
         Helpers.updateClock();
         this._clockInterval = setInterval(function() {
@@ -693,6 +1074,7 @@ var Game = Game || {
         }, 1000);
     },
     
+    // ==================== 移动端检测 ====================
     checkMobile: function() {
         if (window.innerWidth <= 768) {
             var tip = document.getElementById('mobileTip');
@@ -711,6 +1093,7 @@ var Game = Game || {
         }
     },
     
+    // ==================== 重置游戏 ====================
     resetGame: function() {
         this._cameraDenyCount = 0;
         this._cameraAllowCount = 0;

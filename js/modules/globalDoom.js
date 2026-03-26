@@ -273,13 +273,20 @@ var GlobalDoom = GlobalDoom || {
     startDoomEndingMessages: function() {
         var self = this;
         var doomMessages = [
-            { sender: "妈妈", text: "😈 儿子...你怎么还不回家？", time: "19:05" },
-            { sender: "爸爸", text: "👁️ 我们都在等你...变成和我们一样", time: "19:07" },
-            { sender: "妹妹", text: "👤 哥哥，我们变成了一样的呢", time: "19:09" },
-            { sender: "妈妈", text: "💀 你也该成为我们的一员了", time: "19:11" },
-            { sender: "爸爸", text: "🌀 放弃抵抗吧，这是命运", time: "19:13" },
+            { sender: "妈妈", text: "😈 儿子...你怎么还不回家？", time: "19:13" },
+            { sender: "爸爸", text: "👁️ 我们都在等你...变成和我们一样", time: "19:13" },
+            { sender: "妹妹", text: "👤 哥哥，我们变成了一样的呢", time: "19:14" },
+            { sender: "妈妈", text: "💀 你也该成为我们的一员了", time: "19:14" },
+            { sender: "爸爸", text: "🌀 放弃抵抗吧，这是命运", time: "19:14" },
             { sender: "妹妹", text: "✨ 快来陪我们吧，永远在一起", time: "19:15" },
-            { sender: "妈妈", text: "⚠️ 全世界都是我们的了...", time: "19:17" }
+            { sender: "妈妈", text: "⚠️ 全世界都是我们的了...", time: "19:15" },
+            { sender: "爸爸", text: " ( ՞ټ՞) ",time: "19:16" },
+            { sender: "妈妈", text: " ( ՞ټ՞) ",time: "19:17" },
+            { sender: "妹妹", text: " ( ՞ټ՞) ",time: "19:18" },
+            { sender: "爸爸", text: " ( ՞ټ՞) ",time: "19:18" },
+            { sender: "妹妹", text: " ( ՞ټ՞) ",time: "19:18" },
+            { sender: "妈妈", text: " ( ՞ټ՞) ",time: "19:19" }
+        
         ];
         
         var messageIndex = 0;

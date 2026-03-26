@@ -1,5 +1,5 @@
 // 窗口管理器 - 负责所有窗口的创建、拖拽、缩放
-const WindowManager = {
+var WindowManager = {
     _windows: {},
     _container: null,
     
@@ -76,30 +76,53 @@ const WindowManager = {
         return null;
     },
     
-    // 打开窗口
+    // 打开窗口（带动画）
     open: function(id) {
         var win = this._windows[id];
         if (!win) return;
         
         if (win.classList.contains('hidden')) {
             win.classList.remove('hidden');
+            
+            // 设置初始动画状态
+            win.style.transform = 'scale(0.95)';
+            win.style.opacity = '0';
+            win.style.transition = 'transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1), opacity 0.2s ease';
+            
+            // 设置位置
             if (!win.style.left || win.style.left === '' || win.style.left === 'auto') {
                 var pos = Helpers.getRandomPosition(win.offsetWidth, win.offsetHeight);
                 win.style.left = Math.max(20, pos.left) + 'px';
                 win.style.top = Math.max(30, pos.top) + 'px';
                 win.style.position = 'fixed';
             }
+            
+            // 播放动画
+            setTimeout(function() {
+                win.style.transform = 'scale(1)';
+                win.style.opacity = '1';
+            }, 10);
+            
             win.style.zIndex = 100 + Math.floor(Math.random() * 50);
         } else {
+            // 如果已打开，直接关闭
             win.classList.add('hidden');
         }
     },
     
-    // 关闭窗口
+    // 关闭窗口（带动画）
     close: function(id) {
         var win = this._windows[id];
         if (win) {
-            win.classList.add('hidden');
+            win.style.transform = 'scale(0.95)';
+            win.style.opacity = '0';
+            win.style.transition = 'transform 0.15s ease, opacity 0.15s ease';
+            
+            setTimeout(function() {
+                win.classList.add('hidden');
+                win.style.transform = '';
+                win.style.opacity = '';
+            }, 150);
         }
     },
     
@@ -321,16 +344,13 @@ const WindowManager = {
         
         // 重置按钮功能
         if (resizeBtn) {
-            // 移除旧的事件监听器（避免重复绑定）
             var newResizeBtn = resizeBtn.cloneNode(true);
             resizeBtn.parentNode.replaceChild(newResizeBtn, resizeBtn);
             
             newResizeBtn.onclick = function(e) {
                 e.stopPropagation();
-                // 重置窗口大小
                 win.style.width = '600px';
                 win.style.height = '450px';
-                // 确保窗口不超出屏幕
                 var maxLeft = window.innerWidth - 620;
                 var maxTop = window.innerHeight - 500;
                 var currentLeft = parseInt(win.style.left);
@@ -341,7 +361,6 @@ const WindowManager = {
                 if (currentTop > maxTop) {
                     win.style.top = Math.max(30, maxTop) + 'px';
                 }
-                // 如果窗口位置无效，重置到默认位置
                 if (isNaN(currentLeft) || currentLeft < 0) {
                     win.style.left = '20%';
                 }
@@ -352,7 +371,7 @@ const WindowManager = {
         }
     },
     
-    // 刷新所有窗口内容（用于数据更新后重新渲染）
+    // 刷新所有窗口内容
     refreshContent: function(id, renderFunction) {
         var content = this.getContent(id);
         if (content && renderFunction) {
